@@ -2,23 +2,18 @@ name: Deploy to ITU Server
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-    - name: Prepare deployment package
-      run: |
-        mkdir -p deploy_package
-        cp -r *.php components/ data/ images/ css/ js/ deploy_package/
-        find deploy_package -type d -exec chmod 755 {} \;
-        find deploy_package -type f -exec chmod 644 {} \;
-
-    - name: Clean remote directory
+    - name: Clear target directory on ITU server
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.ITU_SSH_HOST }}
@@ -27,27 +22,13 @@ jobs:
         port: ${{ secrets.ITU_SSH_PORT }}
         script: |
           rm -rf public_html/*
-          mkdir -p public_html/{components,data,images}
 
-    - name: Upload files
+    - name: Deploy files to ITU server
       uses: appleboy/scp-action@master
       with:
         host: ${{ secrets.ITU_SSH_HOST }}
         username: ${{ secrets.ITU_SSH_USERNAME }}
         key: ${{ secrets.ITU_SSH_KEY }}
         port: ${{ secrets.ITU_SSH_PORT }}
-        source: "deploy_package/*"
+        source: "."
         target: "public_html/"
-        rm: true
-        overwrite: true
-
-    - name: Fix remote permissions
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.ITU_SSH_HOST }}
-        username: ${{ secrets.ITU_SSH_USERNAME }}
-        key: ${{ secrets.ITU_SSH_KEY }}
-        port: ${{ secrets.ITU_SSH_PORT }}
-        script: |
-          chmod -R 755 public_html
-          find public_html -type f -exec chmod 644 {} \;
