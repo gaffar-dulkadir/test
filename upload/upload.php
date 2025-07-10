@@ -5,7 +5,6 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 // GitHub API ayarları
-$githubToken = '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'; // GitHub PAT
 $githubRepo = 'gaffar-dulkadir/test'; // Örn: kullanıcı/repo
 $githubBranch = 'main'; // Hedef branch
 $uploadDir = 'uploading/'; // Repo içindeki klasör
